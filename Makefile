@@ -1,7 +1,3 @@
-include $(HCLIB_ROOT)/../modules/system/inc/hclib_system.pre.mak
-include $(HCLIB_ROOT)/include/hclib.mak
-include $(HCLIB_ROOT)/../modules/system/inc/hclib_system.post.mak
-
 # Set TBB_MALLOC_LIBDIR to link in the TBB scalable allocator
 ifeq ($(TBB_MALLOC_LIBDIR),)
 	TBB_FLAGS=
@@ -29,6 +25,12 @@ CC?=g++
 CXX?=g++
 FLAGS=-g -O3 -Wall -Werror -Icommon
 
+ifeq ($(JSMN_HOME),)
+	HCLIB_LIBS=-lhclib
+else
+	HCLIB_LIBS=-lhclib $(JSMN_HOME)/libjsmn.a
+endif
+
 all: hclib omp tbb ocr realm
 
 hclib: $(HCLIB_TARGETS)
@@ -50,7 +52,7 @@ bin/%_realm: realm/%_realm.cpp
 	$(CXX) $(FLAGS) -o $@ $^ $(REALM_LIB) -I$(LG_RT_DIR) -lrt
 
 bin/%_hclib: hclib/%_hclib.c
-	$(CC) $(FLAGS) $(HCLIB_CFLAGS) $(HCLIB_LDFLAGS) -o $@ $^ $(HCLIB_LDLIBS) $(TBB_FLAGS)
+	$(CC) $(FLAGS) -I$(HCLIB_ROOT)/include -L$(HCLIB_ROOT)/lib -o $@ $^ $(TBB_FLAGS) $(HCLIB_LIBS)
 
 clean:
 	rm -f bin/*

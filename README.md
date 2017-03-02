@@ -57,7 +57,8 @@ the corresponding make target, e.g.:
     $ make ocr
 
 If you are compiling HClib implementations, HCLIB_ROOT is expected to point to
-your hclib-install directory.
+your hclib-install directory. If you are using the resource_workers branch of
+HClib, JSMN_HOME must point to your installation of the JSMN library.
 
 If you would like to link in the scalable TBB allocator, set TBB_MALLOC_LIBDIR
 to the directory containing libtbbmalloc.so.
