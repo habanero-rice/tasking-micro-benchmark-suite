@@ -3,6 +3,11 @@
 #include <time.h>
 #include <sys/time.h>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 static inline unsigned long long current_time_ns() {
 #ifdef __MACH__
     clock_serv_t cclock;
