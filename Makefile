@@ -26,9 +26,9 @@ CXX?=g++
 FLAGS=-g -O3 -Wall -Werror -Icommon
 
 ifeq ($(JSMN_HOME),)
-	HCLIB_LIBS=-lhclib
+	HCLIB_LIBS=-lhclib -lhclib_system
 else
-	HCLIB_LIBS=-lhclib $(JSMN_HOME)/libjsmn.a
+	HCLIB_LIBS=-lhclib -lhclib_system $(JSMN_HOME)/libjsmn.a
 endif
 
 all: hclib omp tbb ocr realm
@@ -52,7 +52,7 @@ bin/%_realm: realm/%_realm.cpp
 	$(CXX) $(FLAGS) -o $@ $^ $(REALM_LIB) -I$(LG_RT_DIR) -lrt
 
 bin/%_hclib: hclib/%_hclib.c
-	$(CC) $(FLAGS) -I$(HCLIB_ROOT)/include -L$(HCLIB_ROOT)/lib -o $@ $^ $(TBB_FLAGS) $(HCLIB_LIBS)
+	$(CC) $(FLAGS) -I$(HCLIB_ROOT)/include -L$(HCLIB_ROOT)/lib -L$(HCLIB_ROOT)/../modules/system/lib -o $@ $^ $(TBB_FLAGS) $(HCLIB_LIBS)
 
 clean:
-	rm -f bin/*
+	rm -f -r bin/*
