@@ -11,6 +11,8 @@
 
 extern "C" {
 
+static unsigned long long schedule_start_time = 0;
+
 ocrGuid_t taskEdt(u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     int incr = 0;
     incr = incr + 1;
@@ -31,7 +33,7 @@ static void driver(const ocrGuid_t templateGuid) {
 
 // Finish EDT
 ocrGuid_t createEdt(u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
-    assert(depc == 0);
+    assert(depc == 1);
     assert(paramc == 1);
     ocrGuid_t templateGuid = *((ocrGuid_t *)paramv);
 
@@ -52,25 +54,18 @@ ocrGuid_t runEdt(u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     assert(depc == 1); // Triggered after createEdt finish EDT completes
     assert(paramc == 1);
     ocrGuid_t templateGuid = *((ocrGuid_t *)paramv);
-    unsigned long long schedule_start_time;
 
-    ocrGuid_t start_time_block;
-    void *start_time_block_addr;
-    ocrDbCreate(&start_time_block, &start_time_block_addr,
-            sizeof(schedule_start_time), DB_PROP_NONE, NULL, NO_ALLOC);
-
-    *((unsigned long long *)start_time_block_addr) = current_time_ns();
+    schedule_start_time = current_time_ns();
 
     driver(templateGuid);
 
-    return start_time_block;
+    return NULL_GUID;
 }
 
 ocrGuid_t finalEdt(u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     assert(depc == 1); // Triggered after runEdt finish EDT completes
     assert(paramc == 0);
     const unsigned long long schedule_end_time = current_time_ns();
-    const unsigned long long schedule_start_time = *((unsigned long long *)depv[0].ptr);
 
     PRINTF("METRIC task_run %d %.20f\n", NTASKS,
             (double)NTASKS / ((double)(schedule_end_time -
@@ -91,7 +86,7 @@ ocrGuid_t mainEdt ( u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     ocrEdtTemplateCreate(&templateGuid, taskEdt, 0, 0);
 
     ocrGuid_t createTemplateGuid;
-    ocrEdtTemplateCreate(&createTemplateGuid, createEdt, 1, 0);
+    ocrEdtTemplateCreate(&createTemplateGuid, createEdt, 1, 1);
 
     ocrGuid_t runTemplateGuid;
     ocrEdtTemplateCreate(&runTemplateGuid, runEdt, 1, 1);
@@ -99,9 +94,12 @@ ocrGuid_t mainEdt ( u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     ocrGuid_t finalTemplateGuid;
     ocrEdtTemplateCreate(&finalTemplateGuid, finalEdt, 0, 1);
 
+    ocrGuid_t initEvent;
+    ocrEventCreate(&initEvent, OCR_EVENT_ONCE_T, EVT_PROP_NONE);
+
     ocrGuid_t spawnTask, spawnTaskEvent;
     ocrEdtCreate(&spawnTask, createTemplateGuid, 1, (u64 *)&templateGuid,
-            0, NULL, EDT_PROP_FINISH, NULL, &spawnTaskEvent);
+            1, &initEvent, EDT_PROP_FINISH, NULL, &spawnTaskEvent);
 
     ocrGuid_t runTask, runTaskEvent;
     ocrEdtCreate(&runTask, runTemplateGuid, 1, (u64 *)&templateGuid,
@@ -110,6 +108,8 @@ ocrGuid_t mainEdt ( u32 paramc, u64* paramv, u32 depc, ocrEdtDep_t depv[]) {
     ocrGuid_t finalTask, finalTaskEvent;
     ocrEdtCreate(&finalTask, finalTemplateGuid, 0, NULL,
             1, &runTaskEvent, EDT_PROP_NONE, NULL, &finalTaskEvent);
+
+    ocrEventSatisfy(initEvent, NULL_GUID);
 
     return NULL_GUID;
 }

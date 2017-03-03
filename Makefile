@@ -49,7 +49,7 @@ bin/%_ocr: ocr/%_ocr.c
 	$(CXX) $(FLAGS) -o $@ $^ -I$(OCR_INSTALL)/include -locr_x86 -L$(OCR_INSTALL)/lib
 
 bin/%_realm: realm/%_realm.cpp
-	$(CXX) $(FLAGS) -o $@ $^ $(REALM_LIB) -I$(LG_RT_DIR) -lrt
+	$(CXX) $(FLAGS) -o $@ $^ $(REALM_LIB) -I$(LG_RT_DIR) -lrt -ldl
 
 bin/%_hclib: hclib/%_hclib.c
 	$(CC) $(FLAGS) -I$(HCLIB_ROOT)/include -L$(HCLIB_ROOT)/lib -L$(HCLIB_ROOT)/../modules/system/lib -o $@ $^ $(TBB_FLAGS) $(HCLIB_LIBS)

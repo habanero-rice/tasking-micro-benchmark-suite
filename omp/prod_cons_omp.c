@@ -2,6 +2,7 @@
 
 #include <omp.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "prod_cons.h"
 
