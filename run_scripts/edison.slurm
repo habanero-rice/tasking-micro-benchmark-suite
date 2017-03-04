@@ -56,6 +56,7 @@ for TEST in task_spawn; do
         export HCLIB_WORKERS=24
         export OMP_NUM_THREADS=$HCLIB_WORKERS
         export TBB_NUM_THREADS=$HCLIB_WORKERS
+        export CPU_MASK=$(echo "obase=16; $(($((1 << $HCLIB_WORKERS)) - 1))" | bc)
 
         rm -f default.cfg
         $OCR_INSTALL/share/ocr/scripts/Configs/config-generator.py --threads $HCLIB_WORKERS
@@ -73,10 +74,7 @@ for TEST in task_spawn; do
             # same cores of socket 0 via hyperthreading, and then socket 1.
             echo "========== $EXE =========="
             srun --ntasks=1 --ntasks-per-node=1 --cpus-per-task=48 \
-                --cpu_bind=verbose,mask_cpu:FFFFFF ./bin/$EXE $ARGS &> logs/$MODEL
-                # --cpu_bind=verbose,mask_cpu:FFFFFF ./bin/$EXE $ARGS &> logs/$MODEL
-                # --cpu_bind=verbose,mask_cpu:555555555555 ./bin/$EXE $ARGS &> logs/$MODEL
-                # --cpu_bind=verbose,sockets ./bin/$EXE $ARGS &> logs/$MODEL
+                --cpu_bind=verbose,mask_cpu:$CPU_MASK ./bin/$EXE $ARGS &> logs/$MODEL
         fi
     done
 
