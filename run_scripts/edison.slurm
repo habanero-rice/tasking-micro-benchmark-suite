@@ -2,7 +2,7 @@
 
 #SBATCH -p debug
 #SBATCH -N 1
-#SBATCH -t 00:05:00
+#SBATCH -t 00:10:00
 #SBATCH -J hclib-micro-apps
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
@@ -11,6 +11,8 @@ set -e
 
 ulimit -c unlimited
 export MODELS="hclib iomp gomp tbb ocr realm"
+# export HCLIB_LOCALITY_FILE=$HOME/hclib/locality_graphs/edison.no_interconnect.json
+# export HCLIB_LOCALITY_FILE=$HOME/hclib/locality_graphs/edison.no_interconnect.flat.json
 
 # 2 sockets x 12-core CPUs
 
@@ -42,10 +44,9 @@ done
 LINE="$LINE,,"
 echo $LINE >> $LOG_FILE
 
-# for TEST in task_spawn future_spawn task_wait_flat task_wait_recursive fan_out \
-#         fan_out_and_in bin_fan_out parallel_loop prod_cons reduce_var \
-#         unbalanced_bin_fan_out; do
-for TEST in task_spawn; do
+for TEST in task_spawn future_spawn task_wait_flat task_wait_recursive fan_out \
+        fan_out_and_in bin_fan_out parallel_loop prod_cons reduce_var \
+        unbalanced_bin_fan_out; do
     echo
     echo "========== Testing ${TEST} =========="
     echo
@@ -98,11 +99,11 @@ for TEST in task_spawn; do
         echo $LINE >> $LOG_FILE
     done
 
-#     # Cleanup log files
-#     for MODEL in $MODELS; do
-#         EXE=${TEST}_${MODEL}
-#         if [[ -f ./bin/$EXE ]]; then
-#             rm logs/$MODEL
-#         fi
-#     done
+    # Cleanup log files
+    for MODEL in $MODELS; do
+        EXE=${TEST}_${MODEL}
+        if [[ -f ./bin/$EXE ]]; then
+            rm logs/$MODEL
+        fi
+    done
 done
