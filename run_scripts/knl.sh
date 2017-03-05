@@ -10,13 +10,14 @@ export MODELS="hclib iomp tbb"
 
 # 2 sockets x 12-core CPUs
 
-cd $HOME/tasking-micro-benchmark-suite
-
-rm -f *_iomp
+TASKING_SUITE_HOME=$HOME/tasking-micro-benchmark-suite
+cd $TASKING_SUITE_HOME
 
 make clean
 CXX=icpc CC=icc make -j hclib omp tbb
+pushd bin
 for F in $(ls *_omp); do mv $F ${F:0:$((${#F} - 4))}_iomp; done
+popd
 
 LOG_FILE=metrics.csv
 rm -f $LOG_FILE
@@ -42,23 +43,23 @@ for TEST in task_spawn future_spawn task_wait_flat task_wait_recursive fan_out \
             ARGS="-ll:cpu $HCLIB_WORKERS"
         fi
 
-        if [[ -f $EXE ]]; then
+        if [[ -f bin/$EXE ]]; then
             echo "========== $EXE =========="
-            taskset 0xFFFFFFFFFFFFFFFF ./$EXE $ARGS &> $MODEL
+            taskset 0xFFFFFFFFFFFFFFFF ./bin/$EXE $ARGS &> logs/$MODEL
         fi
     done
 
-    if [[ -f hclib ]]; then # Don't run tests if we don't even have HClib results
-        UNIQUE_METRICS=$(cat hclib | grep "^METRIC " | awk '{ print $2 }' | sort | \
+    if [[ -f logs/hclib ]]; then # Don't run tests if we don't even have HClib results
+        UNIQUE_METRICS=$(cat logs/hclib | grep "^METRIC " | awk '{ print $2 }' | sort | \
             uniq)
         for METRIC in $UNIQUE_METRICS; do
-            DATASET=$(cat hclib | grep "^METRIC $METRIC " | head -n 1 | \
+            DATASET=$(cat logs/hclib | grep "^METRIC $METRIC " | head -n 1 | \
                 awk '{ print $3 }')
 
             LINE="$METRIC,$DATASET"
             for MODEL in $MODELS; do
-                if [[ -f $MODEL ]]; then
-                    PERF=$(cat $MODEL | grep "^METRIC $METRIC" | \
+                if [[ -f logs/$MODEL ]]; then
+                    PERF=$(cat logs/$MODEL | grep "^METRIC $METRIC" | \
                         awk '{ print $4 }' | sort -n -r | head -n 1)
                     LINE="$LINE,$PERF"
                 else
@@ -72,9 +73,9 @@ for TEST in task_spawn future_spawn task_wait_flat task_wait_recursive fan_out \
 
     # Cleanup log files
     for MODEL in $MODELS; do
-        EXE=${TEST}_${MODEL}
+        EXE=./bin/${TEST}_${MODEL}
         if [[ -f $EXE ]]; then
-            rm $MODEL
+            rm logs/$MODEL
         fi
     done
 done
