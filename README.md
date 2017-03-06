@@ -48,6 +48,12 @@ descriptions of the parallel pattern or overheads they are intended to measure:
 11. *unbalanced_bin_fan_out*: The same as bin_fan_out, but with each branch set
     to explore to a different depth.
 
+When running these micro-benchmarks, we generally recommend that they be tested
+at varying scales. For example, you might test with a single core, a single
+socket, and multiple sockets. Often, runtimes will behave differently as the
+memory hierarchy they are running on becomes deeper and the benchmark becomes
+more reliant on runtime smarts to perform well.
+
 ## Compiling
 
 The provided Makefile will compile all examples, placing the binaries under
