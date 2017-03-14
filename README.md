@@ -79,6 +79,8 @@ If you are compiling the Realm implementations, REALM_LIB must be set to the
 path to librealm.a and LG_RT_DIR must be set as required in the Legion install
 instructions.
 
+If you are compiling the Qthreads implementations, QTHREADS_HOME must be set to the root Qthread installation directory. Also, if you configured Qthreads to use hwloc, HWLOC_HOME must be set to the root hwloc installation directory. More details on building Qthreads (and with hwloc) can be found in setup_scripts/README.md and setup_scripts/setup_qthreads.sh.
+
 You can change the C and C++ compilers used for these examples by setting the CC
 and CXX environment variables.
 
@@ -87,6 +89,8 @@ and CXX environment variables.
 Sample scripts for running all compiled micro-benchmarks are included under
 run_scripts/. The provided scripts post-process the output of each benchmark,
 producing a CSV file at metrics.csv containing the aggregate results.
+
+For the Qthreads variants, you can use the provided templates under run_scripts and will likely need to experiment with those environment variables to ensure a well-configured Qthreads runtime (Detailed information can be found at: https://goo.gl/qpf29c).
 
 ## Contributing
 
