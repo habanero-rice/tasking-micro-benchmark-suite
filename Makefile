@@ -20,7 +20,7 @@ OCR_TARGETS=bin/task_spawn_ocr bin/task_wait_flat_ocr bin/future_spawn_ocr bin/f
 REALM_TARGETS=bin/task_spawn_realm bin/task_wait_flat_realm bin/future_spawn_realm bin/fan_out_realm \
 	bin/fan_out_and_in_realm bin/bin_fan_out_realm bin/parallel_loop_realm bin/prod_cons_realm \
 	bin/unbalanced_bin_fan_out_realm
-QTHREADS_TARGETS=bin/task_spawn_qthreads bin/future_spawn_qthreads
+QTHREADS_TARGETS=bin/task_spawn_qthreads bin/future_spawn_qthreads bin/fan_out_qthreads bin/fan_out_and_in_qthreads bin/bin_fan_out_qthreads bin/parallel_loop_qthreads
 
 CC?=g++
 CXX?=g++
