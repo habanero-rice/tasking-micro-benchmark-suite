@@ -20,7 +20,10 @@ OCR_TARGETS=bin/task_spawn_ocr bin/task_wait_flat_ocr bin/future_spawn_ocr bin/f
 REALM_TARGETS=bin/task_spawn_realm bin/task_wait_flat_realm bin/future_spawn_realm bin/fan_out_realm \
 	bin/fan_out_and_in_realm bin/bin_fan_out_realm bin/parallel_loop_realm bin/prod_cons_realm \
 	bin/unbalanced_bin_fan_out_realm
-QTHREADS_TARGETS=bin/task_spawn_qthreads bin/future_spawn_qthreads bin/fan_out_qthreads bin/fan_out_and_in_qthreads bin/bin_fan_out_qthreads bin/parallel_loop_qthreads
+QTHREADS_TARGETS=bin/task_spawn_qthreads bin/future_spawn_qthreads \
+	bin/fan_out_qthreads bin/fan_out_and_in_qthreads bin/bin_fan_out_qthreads \
+	bin/parallel_loop_qthreads
+KOKKOS_TARGETS=bin/task_spawn_kokkos
 
 CC?=g++
 CXX?=g++
@@ -40,7 +43,7 @@ else
 	QTHREADS_LIBS=-lqthread -lhwloc
 endif
 
-all: hclib omp tbb ocr realm qthreads
+all: hclib omp tbb ocr realm qthreads kokkos
 
 hclib: $(HCLIB_TARGETS)
 omp: $(OMP_TARGETS)
@@ -48,6 +51,7 @@ tbb: $(TBB_TARGETS)
 ocr: $(OCR_TARGETS)
 realm: $(REALM_TARGETS)
 qthreads: $(QTHREADS_TARGETS)
+kokkos: $(KOKKOS_TARGETS)
 
 bin/%_tbb: tbb/%_tbb.cpp
 	$(CC) -std=c++11 $(FLAGS) -o $@ $^ -I$(TBBROOT)/include -ltbb -L$(TBBROOT)/lib/intel64/gcc4.7
@@ -66,6 +70,9 @@ bin/%_hclib: hclib/%_hclib.c
 
 bin/%_qthreads: qthreads/%_qthreads.c
 	$(CC) $(FLAGS) -I$(QTHREADS_HOME)/include $(QTHREADS_FLAGS) -o $@ $^ $(QTHREADS_LIBS)
+
+bin/%_kokkos: kokkos/%_kokkos.cpp
+	$(CXX) $(FLAGS) -std=c++11 -fopenmp -I$(KOKKOS_HOME)/include -o $@ $^ $(KOKKOS_HOME)/lib/libkokkos.a -ldl
 
 clean:
 	rm -f -r bin/*

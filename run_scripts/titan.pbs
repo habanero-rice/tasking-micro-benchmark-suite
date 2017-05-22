@@ -1,0 +1,79 @@
+#!/bin/bash
+#PBS -A csc205
+#PBS -N tasking-micro-benchmarks
+#PBS -j oe
+#PBS -m abe
+#PBS -q debug
+#PBS -l walltime=00:05:00
+#PBS -l nodes=1
+#PBS -l gres=atlas1%atlas2
+#PBS -V
+
+set -e
+
+export MODELS="hclib omp kokkos"
+export TASKING_SUITE_HOME=$PROJ_DIR/tasking-micro-benchmark-suite
+pushd $TASKING_SUITE_HOME
+
+make clean
+make hclib kokkos omp
+
+export LOG_FILE=metrics.csv
+rm -f $LOG_FILE
+
+LINE="metric,dataset"
+for MODEL in $MODELS; do
+    LINE="$LINE,$MODEL"
+done
+LINE="$LINE,,"
+echo $LINE >> $LOG_FILE
+
+for TEST in task_spawn; do
+    echo
+    echo "========== Testing ${TEST} =========="
+    echo
+
+    for MODEL in $MODELS; do
+        EXE=${TEST}_${MODEL}
+
+        export HCLIB_WORKERS=16
+        export OMP_NUM_THREADS=$HCLIB_WORKERS
+        export CPU_MASK="0"
+        for ITER in $(seq 1 $((HCLIB_WORKERS - 1))); do
+            export CPU_MASK="${CPU_MASK},${ITER}"
+        done
+
+        if [[ -f bin/$EXE ]]; then
+            echo "========== $EXE =========="
+            aprun --pes 1 --pes-per-node 1 --cpu-binding $CPU_MASK $(pwd)/bin/$EXE &> logs/$MODEL
+        fi
+    done
+
+    UNIQUE_METRICS=$(cat logs/hclib | grep "^METRIC " | awk '{ print $2 }' | sort | \
+        uniq)
+    for METRIC in $UNIQUE_METRICS; do
+        DATASET=$(cat logs/hclib | grep "^METRIC $METRIC " | head -n 1 | \
+            awk '{ print $3 }')
+
+        LINE="$METRIC,$DATASET"
+        for MODEL in $MODELS; do
+            if [[ -f logs/$MODEL ]]; then
+                PERF=$(cat logs/$MODEL | grep "^METRIC $METRIC" | \
+                    awk '{ print $4 }' | sort -n -r | head -n 1)
+                LINE="$LINE,$PERF"
+            else
+                LINE="$LINE,"
+            fi
+        done
+        LINE="$LINE,,"
+        echo $LINE >> $LOG_FILE
+    done
+
+    # Cleanup log files
+    for MODEL in $MODELS; do
+        EXE=${TEST}_${MODEL}
+        if [[ -f ./bin/$EXE ]]; then
+            rm logs/$MODEL
+        fi
+    done
+done

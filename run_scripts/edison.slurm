@@ -57,10 +57,10 @@ for TEST in task_spawn future_spawn task_wait_flat task_wait_recursive fan_out \
         export HCLIB_WORKERS=24
         export OMP_NUM_THREADS=$HCLIB_WORKERS
         export TBB_NUM_THREADS=$HCLIB_WORKERS
-	export QTHREAD_NUM_SHEPHERDS=$HCLIB_WORKERS
-	export QTHREAD_NUM_WORKERS_PER_SHEPHERD=1
-	export QTHREAD_WORKER_UNIT=core
-	export QTHREAD_GUARD_PAGES=false
+        export QTHREAD_NUM_SHEPHERDS=$HCLIB_WORKERS
+        export QTHREAD_NUM_WORKERS_PER_SHEPHERD=1
+        export QTHREAD_WORKER_UNIT=core
+        export QTHREAD_GUARD_PAGES=false
         export CPU_MASK=$(echo "obase=16; $(($((1 << $HCLIB_WORKERS)) - 1))" | bc)
 
         rm -f default.cfg
