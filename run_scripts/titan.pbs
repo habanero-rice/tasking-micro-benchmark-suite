@@ -28,7 +28,8 @@ done
 LINE="$LINE,,"
 echo $LINE >> $LOG_FILE
 
-for TEST in task_spawn future_spawn task_wait_flat bin_fan_out unbalanced_bin_fan_out; do
+for TEST in task_spawn task_wait_flat fan_out_and_in bin_fan_out parallel_loop \
+        prod_cons reduce_var unbalanced_bin_fan_out; do
     echo
     echo "========== Testing ${TEST} =========="
     echo

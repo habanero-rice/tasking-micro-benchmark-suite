@@ -23,8 +23,9 @@ REALM_TARGETS=bin/task_spawn_realm bin/task_wait_flat_realm bin/future_spawn_rea
 QTHREADS_TARGETS=bin/task_spawn_qthreads bin/future_spawn_qthreads \
 	bin/fan_out_qthreads bin/fan_out_and_in_qthreads bin/bin_fan_out_qthreads \
 	bin/parallel_loop_qthreads
-KOKKOS_TARGETS=bin/task_spawn_kokkos bin/task_wait_flat_kokkos bin/future_spawn_kokkos \
-	bin/bin_fan_out_kokkos bin/unbalanced_bin_fan_out_kokkos
+KOKKOS_TARGETS=bin/task_spawn_kokkos bin/task_wait_flat_kokkos \
+	bin/fan_out_and_in_kokkos bin/bin_fan_out_kokkos bin/parallel_loop_kokkos bin/prod_cons_kokkos \
+	bin/reduce_var_kokkos bin/unbalanced_bin_fan_out_kokkos
 
 CC?=g++
 CXX?=g++
