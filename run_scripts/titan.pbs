@@ -28,7 +28,7 @@ done
 LINE="$LINE,,"
 echo $LINE >> $LOG_FILE
 
-for TEST in task_spawn task_wait_flat bin_fan_out unbalanced_bin_fan_out; do
+for TEST in task_spawn future_spawn task_wait_flat bin_fan_out unbalanced_bin_fan_out; do
     echo
     echo "========== Testing ${TEST} =========="
     echo
@@ -36,7 +36,7 @@ for TEST in task_spawn task_wait_flat bin_fan_out unbalanced_bin_fan_out; do
     for MODEL in $MODELS; do
         EXE=${TEST}_${MODEL}
 
-        export HCLIB_WORKERS=16
+        export HCLIB_WORKERS=8
         export OMP_NUM_THREADS=$HCLIB_WORKERS
         export CPU_MASK="0"
         for ITER in $(seq 1 $((HCLIB_WORKERS - 1))); do
