@@ -75,9 +75,11 @@ struct DriverTask
 
     static void run() {
         typedef typename Kokkos::TaskScheduler< Space >::memory_space memory_space;
-        enum { Log2_SuperBlockSize = 12 };
+        enum { MinBlockSize = 64 };
+        enum { MaxBlockSize = 2u * 1024u * 1024u };
+        enum { SuperBlockSize = 1u << 12 };
         Kokkos::TaskScheduler< Space > root_sched( memory_space(),
-                1024 * 1024 * 1024, Log2_SuperBlockSize );
+                2u * 1024u * 1024u * 1024u, MinBlockSize, MaxBlockSize, SuperBlockSize);
 
         Kokkos::Future< void, Space > f = Kokkos::host_spawn(
                 Kokkos::TaskSingle( root_sched ), DriverTask( root_sched ) );
