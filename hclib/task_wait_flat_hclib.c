@@ -1,6 +1,7 @@
 #include "hclib.h"
 #include "task_wait_flat.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 void empty_task(void *arg) {
     /*
@@ -34,7 +35,11 @@ void entrypoint(void *arg) {
     for (i = 0; i < N_FLAT_TASK_WAITS; i++) {
         hclib_start_finish();
         {
+#ifdef HCLIB_MASTER
+            hclib_async(empty_task, NULL, NULL, NULL, NULL, 0);
+#else
             hclib_async(empty_task, NULL, NULL, 0, NULL);
+#endif
         }
         hclib_end_finish();
     }

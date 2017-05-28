@@ -1,6 +1,9 @@
+#ifndef HCLIB_MASTER
+
 #include "hclib.h"
 #include "hclib_atomic.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "reduce_var.h"
@@ -75,3 +78,8 @@ int main(int argc, char **argv) {
     hclib_launch(entrypoint, NULL, NULL, 0);
     return 0;
 }
+#else // HCLIB_MASTER
+int main(int argc, char **argv) {
+    return 0;
+}
+#endif

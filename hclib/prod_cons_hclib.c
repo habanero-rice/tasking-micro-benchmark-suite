@@ -1,5 +1,6 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "prod_cons.h"
@@ -31,8 +32,14 @@ void entrypoint(void *arg) {
     {
         int i;
         for (i = 0; i < PROD_CONS_MSGS; i++) {
+#ifdef HCLIB_MASTER
+            hclib_future_t *fut[2] = { NULL, NULL };
+            fut[0] = hclib_get_future_for_promise(signals + i);
+            hclib_async(empty_task, NULL, fut, NULL, NULL, 0);
+#else
             hclib_future_t *fut = hclib_get_future_for_promise(signals + i);
             hclib_async(empty_task, NULL, &fut, 1, NULL);
+#endif
         }
 
         for (i = 0; i < PROD_CONS_MSGS; i++) {

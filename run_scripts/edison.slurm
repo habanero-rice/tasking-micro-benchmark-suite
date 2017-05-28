@@ -6,11 +6,13 @@
 #SBATCH -J hclib-micro-apps
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
+#SBATCH --export=ALL
 
 set -e
 
 ulimit -c unlimited
-export MODELS="hclib iomp gomp tbb ocr realm qthreads"
+
+export MODELS="hclib"
 # export HCLIB_LOCALITY_FILE=$HOME/hclib/locality_graphs/edison.no_interconnect.json
 # export HCLIB_LOCALITY_FILE=$HOME/hclib/locality_graphs/edison.no_interconnect.flat.json
 
@@ -25,7 +27,7 @@ TMP_DIR=$(mktemp -d)
 mv bin/*_omp $TMP_DIR/
 
 make clean
-CXX=icpc CC=icc make -j
+CXX=icpc CC=icc make -j $MODELS
 pushd bin
 for F in $(ls *_omp); do mv $F ${F:0:$((${#F} - 4))}_iomp; done
 popd

@@ -1,5 +1,6 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "task_spawn.h"

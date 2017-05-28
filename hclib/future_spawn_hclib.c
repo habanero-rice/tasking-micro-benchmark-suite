@@ -1,5 +1,6 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "future_spawn.h"
@@ -23,10 +24,18 @@ void entrypoint(void *arg) {
     {
         const unsigned long long start_time = current_time_ns();
 
+#ifdef HCLIB_MASTER
+        hclib_future_t *prev[2] = { NULL, NULL };
+#else
         hclib_future_t *prev = NULL;
+#endif
         int nlaunched = 0;
         do {
+#ifdef HCLIB_MASTER
+            prev[0] = hclib_async_future(empty_task, NULL, prev, NULL, NULL, 0);
+#else
             prev = hclib_async_future(empty_task, NULL, &prev, 1, NULL);
+#endif
             nlaunched++;
         } while (nlaunched < NFUTURES);
 
@@ -39,10 +48,18 @@ void entrypoint(void *arg) {
     const unsigned long long start_time = current_time_ns();
     hclib_start_finish();
     {
+#ifdef HCLIB_MASTER
+        hclib_future_t *prev[2] = { NULL, NULL };
+#else
         hclib_future_t *prev = NULL;
+#endif
         int nlaunched = 0;
         do {
+#ifdef HCLIB_MASTER
+            prev[0] = hclib_async_future(empty_task, NULL, prev, NULL, NULL, 0);
+#else
             prev = hclib_async_future(empty_task, NULL, &prev, 1, NULL);
+#endif
             nlaunched++;
         } while (nlaunched < NFUTURES);
     }

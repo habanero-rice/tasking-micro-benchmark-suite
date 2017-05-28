@@ -31,10 +31,15 @@ CC?=g++
 CXX?=g++
 FLAGS=-g -O3 -Wall -Werror -Icommon
 
+ifeq ($(HCLIB_MASTER),)
 ifeq ($(JSMN_HOME),)
 	HCLIB_LIBS=-lhclib -lhclib_system
 else
 	HCLIB_LIBS=-lhclib -lhclib_system $(JSMN_HOME)/libjsmn.a
+endif
+else
+	FLAGS+=-DHCLIB_MASTER
+	HCLIB_LIBS=-lhclib -lxml2
 endif
 
 ifeq ($(HWLOC_HOME),)

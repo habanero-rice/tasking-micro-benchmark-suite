@@ -1,6 +1,7 @@
 #include "hclib.h"
 #include "task_wait_recursive.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 void recursive_task(void *arg) {
     const size_t depth = (size_t)arg;

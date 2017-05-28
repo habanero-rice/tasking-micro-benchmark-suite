@@ -1,5 +1,6 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "unbalanced_bin_fan_out.h"
@@ -28,8 +29,13 @@ static void recurse(void *arg) {
     if (depth < depth_limit) {
         size_t next = pack(depth + 1, branch);
 
+#ifdef HCLIB_MASTER
+        hclib_async(recurse, (void *)next, NULL, NULL, NULL, 0);
+        hclib_async(recurse, (void *)next, NULL, NULL, NULL, 0);
+#else
         hclib_async(recurse, (void *)next, NULL, 0, NULL);
         hclib_async(recurse, (void *)next, NULL, 0, NULL);
+#endif
     }
 }
 

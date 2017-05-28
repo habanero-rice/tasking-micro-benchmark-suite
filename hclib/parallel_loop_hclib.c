@@ -1,5 +1,6 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "parallel_loop.h"
@@ -12,11 +13,19 @@ void entrypoint(void *arg) {
 
     printf("Using %d HClib workers\n", nworkers);
 
+#ifdef HCLIB_MASTER
+    loop_domain_t domain;
+#else
     hclib_loop_domain_t domain;
+#endif
     domain.low = 0;
     domain.high = PARALLEL_LOOP_RANGE;
     domain.stride = 1;
+#ifdef HCLIB_MASTER
+    domain.tile = (PARALLEL_LOOP_RANGE + nworkers - 1) / nworkers;
+#else
     domain.tile = -1;
+#endif
 
     const unsigned long long recursive_start_time = current_time_ns();
     hclib_start_finish();

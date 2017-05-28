@@ -1,8 +1,13 @@
 #include "hclib.h"
 #include "timing.h"
+#include "hclib_stubs.h"
 
 #include <stdio.h>
 #include "fan_out_and_in.h"
+
+#ifndef MAX_NUM_WAITS
+#define MAX_NUM_WAITS 4
+#endif
 
 void *empty_task(void *arg) {
     /*
@@ -22,7 +27,12 @@ void entrypoint(void *arg) {
     hclib_promise_t prom;
     hclib_promise_init(&prom);
 
+#ifdef HCLIB_MASTER
+    hclib_future_t *fut[2] = { NULL, NULL };
+    fut[0] = hclib_get_future_for_promise(&prom);
+#else
     hclib_future_t *fut = hclib_get_future_for_promise(&prom);
+#endif
     hclib_future_t **futures = (hclib_future_t **)malloc(
             FAN_OUT_AND_IN * sizeof(hclib_future_t *));
     assert(futures);
@@ -33,9 +43,16 @@ void entrypoint(void *arg) {
 
     int i;
     for (i = 0; i < FAN_OUT_AND_IN; i++) {
+#ifdef HCLIB_MASTER
+        futures[i] = hclib_async_future(empty_task, NULL, fut, NULL, NULL, 0);
+#else
         futures[i] = hclib_async_future(empty_task, NULL, &fut, 1, NULL);
+#endif
     }
 
+#ifdef HCLIB_MASTER
+    hclib_future_t *awaits[MAX_NUM_WAITS + 1];
+#endif
     int nfutures = FAN_OUT_AND_IN;
     while (nfutures > 1) {
         int next_nfutures = 0;
@@ -44,8 +61,16 @@ void entrypoint(void *arg) {
             int this_n_futures = nfutures - i;
             if (this_n_futures > MAX_NUM_WAITS) this_n_futures = MAX_NUM_WAITS;
 
+#ifdef HCLIB_MASTER
+            memcpy(awaits, futures + i, this_n_futures * sizeof(hclib_future_t *));
+            awaits[this_n_futures] = NULL;
+
+            futures[next_nfutures] = hclib_async_future(empty_task, NULL,
+                    awaits, NULL, NULL, 0);
+#else
             futures[next_nfutures] = hclib_async_future(empty_task, NULL,
                     futures + i, this_n_futures, NULL);
+#endif
             next_nfutures++;
         }
         nfutures = next_nfutures;
